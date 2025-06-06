@@ -1,117 +1,112 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rhein-Neckar Löwen - Handball Manager</title>
+  <meta charset="UTF-8">
+  <title>RNL – Mannschaft</title>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
-    header { display: flex; align-items: center; background: #002f6c; color: white; padding: 1em; }
-    header img { height: 50px; margin-right: 1em; }
-    main { padding: 2em; text-align: center; }
-    button { margin: 1em; padding: 1em 2em; font-size: 1em; }
-    #tutorial { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); color: white; padding: 2em; z-index: 1000; }
-    #tutorialContent { max-width: 600px; margin: auto; }
-    #bottomBar { position: fixed; bottom: 0; width: 100%; background: #002f6c; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0.5em 1em; font-size: 0.9em; }
-    #bottomBar button { font-size: 0.9em; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    header {
+      background-color: #002D62;
+      color: white;
+      padding: 1em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-top: 1em;
+    }
+    .tab {
+      padding: 0.5em 1em;
+      margin: 0 1em;
+      background-color: #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .tab.active {
+      background-color: #002D62;
+      color: white;
+    }
+    .list {
+      display: none;
+      margin: 1em auto;
+      max-width: 800px;
+      padding: 1em;
+      background: white;
+      border-radius: 10px;
+    }
+    .list.active {
+      display: block;
+    }
+    .item {
+      border-bottom: 1px solid #ddd;
+      padding: 0.5em 0;
+      cursor: pointer;
+    }
+    .details {
+      display: none;
+      margin-top: 0.5em;
+      font-size: 0.9em;
+      color: #444;
+    }
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyC0TXos1yPKy-rEls2Ja8qpqPRa-4InIqs",
-      authDomain: "handball-manager-9cbd4.firebaseapp.com",
-      projectId: "handball-manager-9cbd4",
-      storageBucket: "handball-manager-9cbd4.firebasestorage.app",
-      messagingSenderId: "62181765828",
-      appId: "1:62181765828:web:2e43225e188d0099a34f91"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let currentUser = null;
-
-    onAuthStateChanged(auth, async user => {
-      if (user) {
-        currentUser = user;
-        document.getElementById("userName").textContent = user.email;
-
-        const docRef = doc(db, "tutorialStatus", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists() || !docSnap.data().tutorialDone) {
-          zeigeTutorial();
-        }
-
-        startAutosave();
-      } else {
-        window.location.href = "index.html";
-      }
-    });
-
-    async function speichereSpielstand() {
-      if (!currentUser) return;
-      const saveData = {
-        gespeichertAm: new Date().toISOString(),
-        team: "RNL",
-        daten: { punkte: Math.floor(Math.random() * 10) + 10 }
-      };
-      await setDoc(doc(db, "spielstaende", currentUser.uid), saveData);
-      document.getElementById("autosaveInfo").textContent = "Letzter Autosave: " + new Date().toLocaleTimeString();
-    }
-
-    function startAutosave() {
-      speichereSpielstand();
-      setInterval(speichereSpielstand, 10 * 60 * 1000);
-    }
-
-    function zeigeTutorial() {
-      document.getElementById("tutorial").style.display = "block";
-    }
-
-    async function beendeTutorial() {
-      document.getElementById("tutorial").style.display = "none";
-      if (currentUser) {
-        await setDoc(doc(db, "tutorialStatus", currentUser.uid), { tutorialDone: true });
-      }
-    }
-  </script>
 </head>
 <body>
   <header>
-    <img src="images/rnl.png" alt="RNL Logo" />
-    <h1 style="margin-right:auto;">Rhein-Neckar Löwen</h1>
-    <span id="userName">Lade...</span>
+    <h1>Rhein-Neckar Löwen – Mannschaft</h1>
+    <a href="RNL.html" style="color:white;">⬅️ Zurück</a>
   </header>
 
-  <main>
-    <button onclick="window.location.href='RNLmannschaft.html'">Mannschaft</button>
-    <button onclick="alert('Nächstes Spiel: RNL vs. THW am 23.07.2025 um 17:30 Uhr in der SAP Arena')">Nächstes Spiel</button>
-    <button onclick="alert('Tabelle wird später eingefügt')">Tabelle</button>
-    <button onclick="window.location.href='RNLtransfer.html'">Transfermarkt</button>
-  </main>
-
-  <div id="tutorial">
-    <div id="tutorialContent">
-      <h2>Willkommen beim Handball Manager!</h2>
-      <p>1. <b>Mannschaft:</b> Infos zu Spielern, Stimmung, Verträge, Nummern usw.</p>
-      <p>2. <b>Nächstes Spiel:</b> Zeigt die nächste Partie und Details.</p>
-      <p>3. <b>Tabelle:</b> Deine Platzierung in der Liga.</p>
-      <p>4. <b>Transfermarkt:</b> Transfers & Scouting.</p>
-      <button onclick="beendeTutorial()">Tutorial beenden</button>
-      <button onclick="document.getElementById('tutorial').style.display='none'">X</button>
-    </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('spieler')">Spieler</div>
+    <div class="tab" onclick="switchTab('staff')">Staff</div>
   </div>
 
-  <div id="bottomBar">
-    <span id="autosaveInfo">Autosave alle 10 Minuten aktiv</span>
-    <div>
-      <button onclick="speichereSpielstand()">Speichern</button>
-      <button onclick="zeigeTutorial()">Tutorial erneut anzeigen</button>
+  <div id="spieler" class="list active">
+    <!-- Beispiel-Spieler -->
+    <div class="item" onclick="toggleDetails(this)">
+      Juri Knorr (#10, Rückraum Mitte)
+      <div class="details">Alter: 24, Gehalt: 450.000 €, Marktwert: 1,2 Mio €</div>
     </div>
+    <div class="item" onclick="toggleDetails(this)">
+      David Späth (Torwart)
+      <div class="details">Alter: 22, Gehalt: 300.000 €, Marktwert: 850.000 €</div>
+    </div>
+    <!-- Weitere Spieler folgen -->
   </div>
+
+  <div id="staff" class="list">
+    <!-- Beispiel-Staff -->
+    <div class="item" onclick="toggleDetails(this)">
+      Sebastian Hinze – Cheftrainer
+      <div class="details">Cheftrainer seit 2022</div>
+    </div>
+    <div class="item" onclick="toggleDetails(this)">
+      Uwe Gensheimer – angehender Sportlicher Leiter
+      <div class="details">Ex-Nationalspieler, aktuelle Funktion: Koordination</div>
+    </div>
+    <!-- Weitere Staff-Mitglieder folgen -->
+  </div>
+
+  <script>
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+      document.querySelectorAll(".list").forEach(list => list.classList.remove("active"));
+
+      document.querySelector(`.tab[onclick*="${tabName}"]`).classList.add("active");
+      document.getElementById(tabName).classList.add("active");
+    }
+
+    function toggleDetails(element) {
+      const details = element.querySelector('.details');
+      details.style.display = (details.style.display === 'block') ? 'none' : 'block';
+    }
+  </script>
 </body>
 </html>
