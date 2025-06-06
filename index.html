@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Handball Manager</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+    }
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 1em;
+      font-size: 2em;
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 80vh;
+    }
+    img {
+      width: 200px;
+      height: auto;
+      margin: 1em 0;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    img:hover {
+      transform: scale(1.05);
+    }
+    .team-name {
+      font-size: 1.5em;
+      margin-top: 0.5em;
+    }
+    .hint {
+      margin-top: 2em;
+      font-size: 0.9em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>Handball Manager</header>
+  <main>
+    <img id="teamLogo" src="images/rnl.png" alt="Team-Logo" />
+    <div class="team-name" id="teamName">Rhein-Neckar Löwen</div>
+    <div class="hint">⬅️ ➡️ zum Wechseln · Klick oder Enter zum Auswählen</div>
+  </main>
+
+  <script>
+    const teams = [
+      { name: "Rhein-Neckar Löwen", img: "images/rnl.png", page: "RNL.html" },
+      { name: "THW Kiel", img: "images/thw.png", page: "THW.html" },
+      { name: "Bergischer HC", img: "images/bhc.png", page: "BHC.html" },
+      { name: "Füchse Berlin", img: "images/fuechse.png", page: "Füchse.html" }
+    ];
+
+    let currentIndex = 0;
+    const logo = document.getElementById("teamLogo");
+    const name = document.getElementById("teamName");
+
+    function updateTeam(index) {
+      logo.src = teams[index].img;
+      name.textContent = teams[index].name;
+    }
+
+    function nextTeam() {
+      currentIndex = (currentIndex + 1) % teams.length;
+      updateTeam(currentIndex);
+    }
+
+    function previousTeam() {
+      currentIndex = (currentIndex - 1 + teams.length) % teams.length;
+      updateTeam(currentIndex);
+    }
+
+    function selectTeam() {
+      window.location.href = teams[currentIndex].page;
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") nextTeam();
+      if (e.key === "ArrowLeft") previousTeam();
+      if (e.key === "Enter") selectTeam();
+    });
+
+    logo.addEventListener("click", selectTeam);
+  </script>
+</body>
+</html>
