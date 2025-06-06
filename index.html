@@ -16,6 +16,13 @@
       color: white;
       padding: 1em;
       font-size: 2em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #userInfo {
+      font-size: 1rem;
+      margin-left: 1em;
     }
     main {
       display: flex;
@@ -43,17 +50,99 @@
       font-size: 0.9em;
       color: #666;
     }
+    #loginForm {
+      background: white;
+      padding: 2em;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 300px;
+      margin: 2em auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+    #loginForm input {
+      padding: 0.5em;
+      font-size: 1em;
+    }
+    #loginForm button {
+      padding: 0.5em;
+      font-size: 1em;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #logoutBtn {
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+      padding: 0.3em 0.6em;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    #errorMsg {
+      color: red;
+      font-size: 0.9em;
+    }
   </style>
 </head>
 <body>
-  <header>Handball Manager</header>
+  <header>
+    <div>Handball Manager</div>
+    <div id="userInfo" style="display:none;">
+      Angemeldet als <span id="userEmail"></span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
   <main>
-    <img id="teamLogo" src="images/rnl.png" alt="Team-Logo" />
-    <div class="team-name" id="teamName">Rhein-Neckar Löwen</div>
-    <div class="hint">⬅️ ➡️ zum Wechseln · Klick oder Enter zum Auswählen</div>
+    <!-- Login-Formular -->
+    <form id="loginForm">
+      <h2>Bitte anmelden</h2>
+      <input type="email" id="email" placeholder="E-Mail" required />
+      <input type="password" id="password" placeholder="Passwort" required />
+      <button type="submit">Anmelden</button>
+      <div id="errorMsg"></div>
+    </form>
+
+    <!-- Team Auswahl (versteckt solange nicht angemeldet) -->
+    <div id="teamSelection" style="display:none;">
+      <img id="teamLogo" src="images/rnl.png" alt="Team-Logo" />
+      <div class="team-name" id="teamName">Rhein-Neckar Löwen</div>
+      <div class="hint">⬅️ ➡️ zum Wechseln · Klick oder Enter zum Auswählen</div>
+    </div>
   </main>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
   <script>
+    // Firebase-Konfiguration und Initialisierung
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0TXos1yPKy-rEls2Ja8qpqPRa-4InIqs",
+      authDomain: "handball-manager-9cbd4.firebaseapp.com",
+      projectId: "handball-manager-9cbd4",
+      storageBucket: "handball-manager-9cbd4.firebasestorage.app",
+      messagingSenderId: "62181765828",
+      appId: "1:62181765828:web:2e43225e188d0099a34f91"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const loginForm = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const userInfo = document.getElementById('userInfo');
+    const userEmailSpan = document.getElementById('userEmail');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    const teamSelection = document.getElementById('teamSelection');
+    const logo = document.getElementById("teamLogo");
+    const name = document.getElementById("teamName");
+
     const teams = [
       { name: "Rhein-Neckar Löwen", img: "images/rnl.png", page: "RNL.html" },
       { name: "THW Kiel", img: "images/thw.png", page: "THW.html" },
@@ -62,8 +151,6 @@
     ];
 
     let currentIndex = 0;
-    const logo = document.getElementById("teamLogo");
-    const name = document.getElementById("teamName");
 
     function updateTeam(index) {
       logo.src = teams[index].img;
@@ -84,13 +171,68 @@
       window.location.href = teams[currentIndex].page;
     }
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") nextTeam();
-      if (e.key === "ArrowLeft") previousTeam();
-      if (e.key === "Enter") selectTeam();
+    // Login-Formular abschicken
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = loginForm.email.value;
+      const password = loginForm.password.value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          // Erfolgreich angemeldet
+          errorMsg.textContent = "";
+          loginForm.style.display = "none";
+          teamSelection.style.display = "flex";
+          userInfo.style.display = "block";
+          userEmailSpan.textContent = userCredential.user.email;
+          updateTeam(currentIndex);
+        })
+        .catch(error => {
+          errorMsg.textContent = "Fehler: " + error.message;
+        });
     });
 
-    logo.addEventListener("click", selectTeam);
+    // Logout Button
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        loginForm.style.display = "flex";
+        teamSelection.style.display = "none";
+        userInfo.style.display = "none";
+        loginForm.email.value = "";
+        loginForm.password.value = "";
+      });
+    });
+
+    // Firebase Auth State beobachten
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        // User ist angemeldet
+        loginForm.style.display = "none";
+        teamSelection.style.display = "flex";
+        userInfo.style.display = "block";
+        userEmailSpan.textContent = user.email;
+        updateTeam(currentIndex);
+      } else {
+        // Kein User angemeldet
+        loginForm.style.display = "flex";
+        teamSelection.style.display = "none";
+        userInfo.style.display = "none";
+      }
+    });
+
+    // Pfeiltasten und Klick Events für Teamauswahl
+    document.addEventListener("keydown", (e) => {
+      if (teamSelection.style.display === "flex") {
+        if (e.key === "ArrowRight") nextTeam();
+        if (e.key === "ArrowLeft") previousTeam();
+        if (e.key === "Enter") selectTeam();
+      }
+    });
+
+    logo.addEventListener("click", () => {
+      if (teamSelection.style.display === "flex") selectTeam();
+    });
+
   </script>
 </body>
 </html>
