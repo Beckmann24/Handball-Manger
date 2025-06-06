@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Rhein-Neckar Löwen – Mannschaft</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+    }
+
+    header {
+      background: #002b45;
+      color: white;
+      padding: 1em;
+      display: flex;
+      align-items: center;
+      gap: 1em;
+    }
+
+    header img {
+      height: 50px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .tabs {
+      margin: 1em;
+      display: flex;
+      gap: 1em;
+    }
+
+    .tab {
+      padding: 0.5em 1em;
+      background: #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #002b45;
+      color: white;
+    }
+
+    table {
+      width: 90%;
+      margin: auto;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th, td {
+      padding: 0.75em;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    tr:hover {
+      background: #f1f1f1;
+      cursor: pointer;
+    }
+
+    .detail {
+      width: 90%;
+      margin: 2em auto;
+      padding: 1em;
+      background: white;
+      border: 1px solid #ccc;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="images/rnl.png" alt="RNL-Logo">
+    <h1>Rhein-Neckar Löwen – Mannschaft</h1>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" id="spielerTab">Spieler</div>
+    <div class="tab" id="staffTab">Staff</div>
+  </div>
+
+  <table id="übersicht">
+    <thead>
+      <tr>
+        <th>Nr</th><th>Name</th><th>Position</th><th>Alter</th><th>Gehalt</th><th>Marktwert</th>
+      </tr>
+    </thead>
+    <tbody id="datenBody"></tbody>
+  </table>
+
+  <div class="detail hidden" id="detailBox"></div>
+
+  <script>
+    const spieler = [
+      { nr: 1, name: "Niklas Landin", position: "Torwart", alter: 35, gehalt: "600.000 €", marktwert: "1,2 Mio €", info: "Weltklasse-Torwart aus Dänemark" },
+      { nr: 17, name: "Juri Knorr", position: "Rückraum Mitte", alter: 24, gehalt: "500.000 €", marktwert: "2,5 Mio €", info: "Deutscher Nationalspieler" },
+      { nr: 6, name: "Patrick Groetzki", position: "Rechtsaußen", alter: 35, gehalt: "450.000 €", marktwert: "800.000 €", info: "Urgestein der RNL" },
+    ];
+
+    const staff = [
+      { nr: "-", name: "Sebastian Hinze", position: "Trainer", alter: 44, gehalt: "300.000 €", marktwert: "-", info: "Cheftrainer seit 2022" },
+      { nr: "-", name: "Klaus Gärtner", position: "Co-Trainer", alter: 41, gehalt: "200.000 €", marktwert: "-", info: "Langjähriger Co-Trainer" },
+    ];
+
+    const datenBody = document.getElementById("datenBody");
+    const detailBox = document.getElementById("detailBox");
+    const spielerTab = document.getElementById("spielerTab");
+    const staffTab = document.getElementById("staffTab");
+
+    function zeigeTabelle(data) {
+      datenBody.innerHTML = "";
+      data.forEach((person, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${person.nr}</td>
+          <td>${person.name}</td>
+          <td>${person.position}</td>
+          <td>${person.alter}</td>
+          <td>${person.gehalt}</td>
+          <td>${person.marktwert}</td>
+        `;
+        tr.addEventListener("click", () => zeigeDetails(person));
+        datenBody.appendChild(tr);
+      });
+      detailBox.classList.add("hidden");
+    }
+
+    function zeigeDetails(person) {
+      detailBox.classList.remove("hidden");
+      detailBox.innerHTML = `
+        <h2>${person.name} (${person.position})</h2>
+        <p><strong>Nummer:</strong> ${person.nr}</p>
+        <p><strong>Alter:</strong> ${person.alter}</p>
+        <p><strong>Gehalt:</strong> ${person.gehalt}</p>
+        <p><strong>Marktwert:</strong> ${person.marktwert}</p>
+        <p><strong>Info:</strong> ${person.info}</p>
+        <button onclick="detailBox.classList.add('hidden')">Schließen</button>
+      `;
+    }
+
+    spielerTab.addEventListener("click", () => {
+      spielerTab.classList.add("active");
+      staffTab.classList.remove("active");
+      zeigeTabelle(spieler);
+    });
+
+    staffTab.addEventListener("click", () => {
+      staffTab.classList.add("active");
+      spielerTab.classList.remove("active");
+      zeigeTabelle(staff);
+    });
+
+    // Standard: Spieler anzeigen
+    zeigeTabelle(spieler);
+  </script>
+</body>
+</html>
