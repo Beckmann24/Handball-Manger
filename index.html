@@ -74,6 +74,10 @@
       cursor: pointer;
       border-radius: 5px;
     }
+    .google-btn {
+      background: #db4437;
+      margin-top: 1em;
+    }
     #logoutBtn {
       background: transparent;
       border: 1px solid white;
@@ -104,11 +108,12 @@
       <h2>Bitte anmelden</h2>
       <input type="email" id="email" placeholder="E-Mail" required />
       <input type="password" id="password" placeholder="Passwort" required />
-      <button type="submit">Anmelden</button>
+      <button type="submit">Mit E-Mail anmelden</button>
+      <button type="button" id="googleLogin" class="google-btn">Mit Google anmelden</button>
       <div id="errorMsg"></div>
     </form>
 
-    <!-- Team Auswahl (versteckt solange nicht angemeldet) -->
+    <!-- Team Auswahl -->
     <div id="teamSelection" style="display:none;">
       <img id="teamLogo" src="images/rnl.png" alt="Team-Logo" />
       <div class="team-name" id="teamName">Rhein-Neckar Löwen</div>
@@ -121,7 +126,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 
   <script>
-    // Firebase-Konfiguration und Initialisierung
     const firebaseConfig = {
       apiKey: "AIzaSyC0TXos1yPKy-rEls2Ja8qpqPRa-4InIqs",
       authDomain: "handball-manager-9cbd4.firebaseapp.com",
@@ -134,6 +138,7 @@
     const auth = firebase.auth();
 
     const loginForm = document.getElementById('loginForm');
+    const googleLoginBtn = document.getElementById('googleLogin');
     const errorMsg = document.getElementById('errorMsg');
     const userInfo = document.getElementById('userInfo');
     const userEmailSpan = document.getElementById('userEmail');
@@ -171,7 +176,6 @@
       window.location.href = teams[currentIndex].page;
     }
 
-    // Login-Formular abschicken
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const email = loginForm.email.value;
@@ -179,20 +183,24 @@
 
       auth.signInWithEmailAndPassword(email, password)
         .then(userCredential => {
-          // Erfolgreich angemeldet
           errorMsg.textContent = "";
-          loginForm.style.display = "none";
-          teamSelection.style.display = "flex";
-          userInfo.style.display = "block";
-          userEmailSpan.textContent = userCredential.user.email;
-          updateTeam(currentIndex);
         })
         .catch(error => {
           errorMsg.textContent = "Fehler: " + error.message;
         });
     });
 
-    // Logout Button
+    googleLoginBtn.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          errorMsg.textContent = "";
+        })
+        .catch(error => {
+          errorMsg.textContent = "Google-Login fehlgeschlagen: " + error.message;
+        });
+    });
+
     logoutBtn.addEventListener('click', () => {
       auth.signOut().then(() => {
         loginForm.style.display = "flex";
@@ -203,24 +211,20 @@
       });
     });
 
-    // Firebase Auth State beobachten
     auth.onAuthStateChanged(user => {
       if (user) {
-        // User ist angemeldet
         loginForm.style.display = "none";
         teamSelection.style.display = "flex";
         userInfo.style.display = "block";
         userEmailSpan.textContent = user.email;
         updateTeam(currentIndex);
       } else {
-        // Kein User angemeldet
         loginForm.style.display = "flex";
         teamSelection.style.display = "none";
         userInfo.style.display = "none";
       }
     });
 
-    // Pfeiltasten und Klick Events für Teamauswahl
     document.addEventListener("keydown", (e) => {
       if (teamSelection.style.display === "flex") {
         if (e.key === "ArrowRight") nextTeam();
@@ -232,7 +236,7 @@
     logo.addEventListener("click", () => {
       if (teamSelection.style.display === "flex") selectTeam();
     });
-
   </script>
 </body>
 </html>
+
